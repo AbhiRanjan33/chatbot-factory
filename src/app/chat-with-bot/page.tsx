@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
 import Navbar from '../components/Navbar';
-import AuthPromptModal from '../components/AuthPromptModal';
 import Loading from '../components/Loading';
 import ThreeBackground from '../components/ThreeBackground';
 

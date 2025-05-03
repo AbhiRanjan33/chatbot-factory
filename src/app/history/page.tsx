@@ -48,12 +48,10 @@ const History: React.FC = () => {
         setConversations(data)
         setError("")
       } else {
-        console.error("Failed to fetch conversations:", data.error)
-        setError("Failed to load chat history. Please try again.")
+        setError("Failed to load chat history.")
       }
     } catch (err) {
-      console.error("Error fetching conversations:", err)
-      setError("Error loading chat history. Please try again.")
+      setError("Error loading chat history.")
     } finally {
       setIsLoading(false)
     }
@@ -116,7 +114,7 @@ const History: React.FC = () => {
         ) : (
           <div className="space-y-4">
             {Object.entries(groupedConversations)
-              .sort(([a], [b]) => (b > a ? 1 : -1))
+              .sort(([, a], [, b]) => new Date(b[0].createdAt).getTime() - new Date(a[0].createdAt).getTime())
               .map(([sessionId, sessionConvs]) => {
                 const firstConv = sessionConvs[0]
                 const isExpanded = expandedSessions.has(sessionId)
@@ -125,20 +123,17 @@ const History: React.FC = () => {
                     key={sessionId}
                     className="bg-gray-900 p-4 rounded-lg border border-blue-500/30 hover:bg-gray-800/50 transition-all"
                   >
-                    <div className="flex justify-between items-start">
+                    <div className="flex justify-between items-center">
                       <div>
                         <p className="text-blue-400 font-semibold">
-                          Session: {new Date(firstConv.createdAt).toLocaleDateString()}
+                          {new Date(firstConv.createdAt).toLocaleDateString()}
                         </p>
                         <p className="text-gray-300">
-                          <strong>Prompt Preview:</strong>{" "}
                           {(firstConv.prompt || "N/A").substring(0, 50)}
                           {(firstConv.prompt || "").length > 50 ? "..." : ""}
                         </p>
                         <p className="text-gray-500 text-sm">
-                          <strong>Messages:</strong> {sessionConvs.length} |{" "}
-                          <strong>Last Updated:</strong>{" "}
-                          {new Date(firstConv.createdAt).toLocaleString()}
+                          {sessionConvs.length} {sessionConvs.length === 1 ? "message" : "messages"}
                         </p>
                       </div>
                       <div className="flex space-x-2">
@@ -152,62 +147,41 @@ const History: React.FC = () => {
                           onClick={() => toggleSession(sessionId)}
                           className="px-4 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm transition-colors"
                         >
-                          {isExpanded ? "View Less" : "View More"}
+                          {isExpanded ? "Hide" : "Show"}
                         </button>
                       </div>
                     </div>
                     {isExpanded && (
-                      <div className="mt-4 space-y-4">
+                      <div className="mt-4 space-y-3">
                         {sessionConvs.map((conv) => (
                           <div
                             key={conv._id}
-                            className="border-t border-gray-700 pt-3 relative group"
+                            className="border-t border-gray-700 pt-3"
                           >
-                            <button
-                              onClick={() =>
-                                router.push(
-                                  `/chat-with-bot?endpoint=${encodeURIComponent(
-                                    cleanApiLink(conv.apiLink),
-                                  )}`,
-                                )
-                              }
-                              className="absolute top-3 right-3 px-4 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm transition-colors"
-                            >
-                              Chat
-                            </button>
-                            <div className="pr-24">
-                              <p className="text-blue-400 font-semibold mb-1">Prompt:</p>
-                              <p className="text-gray-300 mb-2">{conv.prompt || "N/A"}</p>
-                              <p className="text-blue-400 font-semibold mb-1">
-                                API Endpoint:
-                              </p>
-                              <p className="text-gray-300 mb-2">
-                                <a
-                                  href={cleanApiLink(conv.apiLink)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 hover:text-blue-400 hover:underline break-all"
-                                >
-                                  {cleanApiLink(conv.apiLink)}
-                                </a>
-                              </p>
-                              {conv.files && conv.files.length > 0 && (
-                                <>
-                                  <p className="text-blue-400 font-semibold mb-1">Files:</p>
-                                  <p className="text-gray-300 mb-2">
-                                    {conv.files.join(", ")}
-                                  </p>
-                                </>
-                              )}
-                              <p className="text-blue-400 font-semibold mb-1">Response:</p>
-                              <p className="text-gray-300 mb-2">
-                                {conv.response || "No response available"}
-                              </p>
-                              <p className="text-blue-400 font-semibold mb-1">Date:</p>
-                              <p className="text-gray-500 text-sm">
-                                {new Date(conv.createdAt).toLocaleString()}
-                              </p>
-                            </div>
+                            <p className="text-blue-400 font-semibold mb-1">Prompt:</p>
+                            <p className="text-gray-300 mb-2">{conv.prompt || "N/A"}</p>
+                            <p className="text-blue-400 font-semibold mb-1">Response:</p>
+                            <p className="text-gray-300 mb-2">{conv.response || "No response available"}</p>
+                            <p className="text-blue-400 font-semibold mb-1">API Endpoint:</p>
+                            <p className="text-gray-300 mb-2">
+                              <a
+                                href={cleanApiLink(conv.apiLink)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 hover:text-blue-400 hover:underline break-all"
+                              >
+                                {cleanApiLink(conv.apiLink)}
+                              </a>
+                            </p>
+                            {conv.files && conv.files.length > 0 && (
+                              <>
+                                <p className="text-blue-400 font-semibold mb-1">Files:</p>
+                                <p className="text-gray-300 mb-2">{conv.files.join(", ")}</p>
+                              </>
+                            )}
+                            <p className="text-gray-500 text-sm">
+                              {new Date(conv.createdAt).toLocaleString()}
+                            </p>
                           </div>
                         ))}
                       </div>
