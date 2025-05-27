@@ -477,3 +477,48 @@ File uploads are restricted to PDF and TXT formats.
 The application uses Clerk for user authentication, and a separate Render token is required for backend operations like chatbot creation and file uploads.
 Session management is handled using UUIDs stored in local storage, allowing users to resume sessions via the sessionId query parameter.
 
+Sample Q and A
+You:
+Tell me the first question of the pdf and solve it
+🤖 Bot:
+The first question in the PDF is:
+
+"Assume that a random student spreads a quiz syllabus. What is the probability that
+
+
+
+P&S
+8.
+
+10.
+
+hE
+
+12.
+
+
+
+."
+
+This is a probability and statistics problem, and it seems to be asking for the probability of a certain event occurring.
+
+To solve this problem, we need to define what the event is. Let's assume that the event is "the randomly selected student will take his/her interview at a company that offers an annual package of at least 10 lakhs".
+
+The problem states that 32, 16, 8, 4, and 4 students appear for MSR, Intel, Google, Honeywell, and Infosys interviews, respectively. It also states that the annual packages offered by the companies are 20, 18, 24, 16, and 14 lakhs, respectively.
+
+We can find the probability of the event as follows:
+
+Let E be the event that the randomly selected student takes his/her interview at a company that offers an annual package of at least 10 lakhs.
+
+The probability of E can be found as:
+
+P(E) = P(MSR) + P(Intel) + P(Google) + P(Honeywell) + P(Infosys)
+
+= (32/64) + (16/64) + (8/64) + (4/64) + (4/64)
+
+= 1/2
+
+So, the probability that the randomly selected student will take his/her interview at a company that offers an annual package of at least 10 lakhs is 1/2 or 50%.
+
+Please let me know if you would like me to help with the next question or if you have any questions about this answer.
+
