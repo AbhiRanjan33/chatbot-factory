@@ -1,4 +1,74 @@
 To start the app, download the required packages from requirements.txt and run npm run dev.
+# Chatbot Application
+
+This is a Next.js-based chatbot application that allows users to create and interact with chatbots, upload files, and manage conversation history. The application uses Clerk for authentication, MongoDB for data storage, and a custom backend API for chatbot functionality.
+
+## Prerequisites
+
+Before setting up the application, ensure you have the following installed:
+- **Node.js** (version 18 or higher)
+- **npm** (version 9 or higher)
+- A **MongoDB** database (e.g., MongoDB Atlas)
+- A **Clerk** account for authentication
+
+## Setup Instructions
+
+1. **Clone the Repository**
+
+   ```bash
+   git clone <repository-url>
+   cd frontend
+Install Dependencies
+
+Install all required dependencies by running the following command:
+
+bash
+
+Copy
+npm install
+This will install all dependencies listed in package.json.
+
+Configure Environment Variables
+
+Create a .env.local file in the root of the project and add the following environment variables:
+
+env
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<your-clerk-publishable-key>
+CLERK_SECRET_KEY=<your-clerk-secret-key>
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
+MONGODB_URI=<your-mongodb-connection-string>
+NEXT_PUBLIC_BACKEND_API_URL=<your-backend-api-url>
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: Your Clerk publishable key (e.g., pk_test_...). Obtain this from your Clerk dashboard.
+CLERK_SECRET_KEY: Your Clerk secret key (e.g., sk_test_...). Obtain this from your Clerk dashboard.
+NEXT_PUBLIC_CLERK_SIGN_IN_URL: The URL for the sign-in page (default: /sign-in).
+NEXT_PUBLIC_CLERK_SIGN_UP_URL: The URL for the sign-up page (default: /sign-up).
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: The redirect URL after signing in (default: /).
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: The redirect URL after signing up (default: /).
+MONGODB_URI: Your MongoDB connection string (e.g., mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<database>?retryWrites=true&w=majority).
+NEXT_PUBLIC_BACKEND_API_URL: The URL of the backend API (e.g., https://my-chatbot-factory.onrender.com).
+Note: Ensure sensitive information like CLERK_SECRET_KEY and MONGODB_URI is kept secure and not committed to version control. Use .gitignore to exclude .env.local.
+
+Run the Development Server
+
+Start the Next.js development server:
+
+bash
+npm run dev
+The application will be available at http://localhost:3000.
+
+Build and Run for Production
+
+To build the application for production:
+
+bash
+npm run build
+To start the production server:
+
+bash
+npm start
 I have attached the screenshots in the google form.
 
 
