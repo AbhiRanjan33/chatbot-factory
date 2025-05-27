@@ -394,7 +394,9 @@ Description: Saves a user-bot conversation for a specific chatbot.
 Error Handling
 
 400 Bad Request: Invalid input or missing required fields.
+
 401 Unauthorized: Missing or invalid authentication token.
+
 500 Internal Server Error: Server-side issue; contact support if persistent.
 
 Notes
