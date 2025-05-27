@@ -70,6 +70,7 @@ To start the production server:
 bash
 npm start
 I have attached the screenshots in the google form.
+Sample pdf is PYQ_SEM1.pdf
 
 
 Chatbot API Documentation
