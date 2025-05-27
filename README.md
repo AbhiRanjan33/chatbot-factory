@@ -1,36 +1,406 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+To start the app, download the required packages from requirements.txt and run npm run dev.
+I have attached the screenshots in the google form.
 
-## Getting Started
 
-First, run the development server:
+Chatbot API Documentation
+This document describes the API endpoints used by the chatbot application to manage user authentication, chatbot creation, file uploads, conversation history, and chatbot interactions. The API is hosted at https://my-chatbot-factory.onrender.com/api/v1.
+Base URL
+https://my-chatbot-factory.onrender.com/api/v1
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Authentication
+Most endpoints require authentication via a Bearer token. The application uses two types of tokens:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Clerk Token: Obtained via Clerk's useAuth hook for authenticating requests to the /api/conversations and /api/chatbot-conversations endpoints.
+Render Token: Obtained by logging into the backend via the /users/login endpoint, used for creating chatbots and uploading files.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Endpoints
+1. User Login
+Authenticates a user and returns a Render token for subsequent API calls.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Endpoint: /users/login
+Method: POST
+Headers:
+Content-Type: application/json
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+Request Body:{
+  "email": "string",
+  "password": "string"
+}
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+email: User's email address (e.g., test@example.com).
+password: User's password (e.g., password123).
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Response:
+Success (200):{
+  "status": "success",
+  "token": "string",
+  "data": {
+    "user": {
+      "_id": "string",
+      "email": "string",
+      "name": "string"
+    }
+  }
+}
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+token: JWT token for authenticating subsequent requests.
+
+
+Error (401):{
+  "status": "error",
+  "message": "Invalid credentials"
+}
+
+
+
+
+Description: Authenticates a user and returns a token used for creating chatbots and uploading files.
+
+2. Create Chatbot
+Creates a new chatbot with a specified name and prompt.
+
+Endpoint: /chatbots
+Method: POST
+Headers:
+Content-Type: application/json
+Authorization: Bearer <render_token>
+
+
+Request Body:{
+  "name": "string",
+  "prompt": "string"
+}
+
+
+name: Name of the chatbot (e.g., Chatbot-1697051234567).
+prompt: The initial prompt or conversation history to initialize the chatbot.
+
+
+Response:
+Success (201):{
+  "status": "success",
+  "data": {
+    "chatbot": {
+      "_id": "string",
+      "name": "string",
+      "apiEndpoint": "string",
+      "createdAt": "string"
+    },
+    "response": "string"
+  }
+}
+
+
+chatbot.apiEndpoint: The endpoint for interacting with the created chatbot (e.g., /api/v1/chatbots/chat/chbt_ce8e8905d3da437983b02a9ceb51327d).
+response: The chatbot's initial response.
+
+
+Error (400):{
+  "status": "error",
+  "message": "Chatbot creation failed"
+}
+
+
+
+
+Description: Creates a new chatbot instance and returns its unique API endpoint.
+
+3. Upload Files to Chatbot
+Uploads PDF or TXT files to a specific chatbot for processing.
+
+Endpoint: /chatbots/:chatbotId/upload
+Method: POST
+Headers:
+Authorization: Bearer <render_token>
+
+
+Request Body: Form-data with key file containing one or more PDF or TXT files.
+URL Parameters:
+chatbotId: The unique ID of the chatbot (e.g., chbt_ce8e8905d3da437983b02a9ceb51327d).
+
+
+Response:
+Success (200):{
+  "status": "success",
+  "data": {
+    "files": ["string"]
+  }
+}
+
+
+files: Array of uploaded file names.
+
+
+Error (400):{
+  "status": "error",
+  "message": "File upload failed"
+}
+
+
+
+
+Description: Uploads files to the specified chatbot. Only PDF and TXT files are supported.
+
+4. Chat with Chatbot
+Sends a message to a chatbot and receives a response.
+
+Endpoint: /chatbots/chat/:chatbotId
+Method: POST
+Headers:
+Content-Type: application/json
+
+
+URL Parameters:
+chatbotId: The unique ID of the chatbot (e.g., chbt_ce8e8905d3da437983b02a9ceb51327d).
+
+
+Request Body:{
+  "message": "string"
+}
+
+
+message: The user's message to the chatbot.
+
+
+Response:
+Success (200):{
+  "status": "success",
+  "data": {
+    "response": "string"
+  }
+}
+
+
+response: The chatbot's response to the message.
+
+
+Error (400):{
+  "status": "error",
+  "message": "Chat failed"
+}
+
+
+
+
+Description: Sends a message to the specified chatbot and retrieves its response. No authentication is required for this endpoint.
+
+5. Fetch Conversations (Session-Specific)
+Retrieves conversation history for a specific session.
+
+Endpoint: /api/conversations
+Method: GET
+Headers:
+Content-Type: application/json
+Authorization: Bearer <clerk_token>
+
+
+Query Parameters:
+sessionId: The unique session ID for which to fetch conversations.
+
+
+Response:
+Success (200):[
+  {
+    "_id": "string",
+    "sessionId": "string",
+    "prompt": "string",
+    "apiLink": "string",
+    "files": ["string"],
+    "response": "string",
+    "createdAt": "string"
+  }
+]
+
+
+prompt: The user's input or prompt.
+apiLink: The chatbot's API endpoint.
+files: Array of uploaded file names (if any).
+response: The chatbot's response.
+createdAt: Timestamp of the conversation.
+
+
+Error (400):{
+  "error": "Failed to load chat history"
+}
+
+
+
+
+Description: Retrieves all conversations associated with a specific session ID.
+
+6. Fetch All Conversations
+Returns all conversations for the authenticated user.
+
+Endpoint: /api/conversations
+Method: GET
+Headers:
+Content-Type: application/json
+Authorization: Bearer <clerk_token>
+
+
+Response:
+Success (200):[
+  {
+    "_id": "string",
+    "sessionId": "string",
+    "prompt": "string",
+    "apiLink": "string",
+    "files": ["string"],
+    "response": "string",
+    "createdAt": "string"
+  }
+]
+
+
+Error (400):{
+  "error": "Failed to load conversation history"
+}
+
+
+
+
+Description: Retrieves all conversations for the authenticated user across all sessions.
+
+7. Save Conversation
+Saves a new conversation to the backend.
+
+Endpoint: /api/conversations
+Method: POST
+Headers:
+Content-Type: application/json
+Authorization: Bearer <clerk_token>
+
+
+Request Body:{
+  "sessionId": "string",
+  "prompt": "string",
+  "apiLink": "string",
+  "files": ["string"],
+  "response": "string"
+}
+
+
+sessionId: The unique session ID.
+prompt: The user's input or prompt.
+apiLink: The chatbot's API endpoint.
+files: Array of uploaded file names (if any).
+response: The chatbot's response.
+
+
+Response:
+Success (201):{
+  "_id": "string",
+  "sessionId": "string",
+  "prompt": "string",
+  "apiLink": "string",
+  "files": ["string"],
+  "response": "string",
+  "createdAt": "string"
+}
+
+
+Error (400):{
+  "error": "Failed to save conversation"
+}
+
+
+
+
+Description: Saves a new conversation to the backend for the authenticated user.
+
+8. Fetch Chatbot Conversations
+Retrieves conversation history for a specific chatbot API endpoint.
+
+Endpoint: /api/chatbot-conversations
+Method: GET
+Headers:
+Content-Type: application/json
+Authorization: Bearer <clerk_token>
+
+
+Query Parameters:
+apiEndpoint: The chatbot's API endpoint (e.g., https://my-chatbot-factory.onrender.com/api/v1/chatbots/chat/chbt_ce8e8905d3da437983b02a9ceb51327d).
+
+
+Response:
+Success (200):[
+  {
+    "role": "user" | "bot",
+    "content": "string"
+  }
+]
+
+
+role: Either user or bot, indicating the message sender.
+content: The message content.
+
+
+Error (400):{
+  "error": "Failed to fetch conversations"
+}
+
+
+
+
+Description: Retrieves the conversation history for a specific chatbot.
+
+9. Save Chatbot Conversation
+Saves a new conversation entry for a specific chatbot.
+
+Endpoint: /api/chatbot-conversations
+Method: POST
+Headers:
+Content-Type: application/json
+Authorization: Bearer <clerk_token>
+
+
+Request Body:{
+  "prompt": "string",
+  "response": "string",
+  "apiEndpoint": "string"
+}
+
+
+prompt: The user's input.
+response: The chatbot's response.
+apiEndpoint: The chatbot's API endpoint.
+
+
+Response:
+Success (201):{
+  "status": "success",
+  "data": {
+    "prompt": "string",
+    "response": "string",
+    "apiEndpoint": "string",
+    "createdAt": "string"
+  }
+}
+
+
+Error (400):{
+  "error": "Failed to save conversation"
+}
+
+
+
+
+Description: Saves a user-bot conversation for a specific chatbot.
+
+Error Handling
+
+400 Bad Request: Invalid input or missing required fields.
+401 Unauthorized: Missing or invalid authentication token.
+500 Internal Server Error: Server-side issue; contact support if persistent.
+
+Notes
+
+The cleanApiLink function is used to normalize API endpoints by removing duplicate /api/v1 segments, ensuring consistent URL handling.
+File uploads are restricted to PDF and TXT formats.
+The application uses Clerk for user authentication, and a separate Render token is required for backend operations like chatbot creation and file uploads.
+Session management is handled using UUIDs stored in local storage, allowing users to resume sessions via the sessionId query parameter.
+
