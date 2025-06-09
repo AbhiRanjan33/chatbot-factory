@@ -24,6 +24,7 @@ interface Conversation {
 const Home: React.FC = () => {
   const [message, setMessage] = useState<string>('');
   const [files, setFiles] = useState<File[] | null>(null);
+  const [mode, setMode] = useState<string>(''); // Added state to track mode
   const [result, setResult] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -203,17 +204,16 @@ const Home: React.FC = () => {
       console.log('Prompt:', prompt);
       prompt += `--- Current Message ---\nUser: ${message || 'File upload'}\n${files ? `Files: ${JSON.stringify(files.map((f) => f.name))}\n` : ''}`;
 
-      console.log('Creating chatbot:', { name: botName, prompt });
+      console.log('Creating chatbot:', { name: botName, prompt, mode });
+      const createBody = { name: botName, prompt };
+      if (mode) createBody['mode'] = mode; // Include mode if selected
       const createResponse = await fetch(`${backendUrl}/chatbots`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${renderToken}`,
         },
-        body: JSON.stringify({
-          name: botName,
-          prompt,
-        }),
+        body: JSON.stringify(createBody),
       });
       console.log('Chatbot response status:', createResponse.status);
       const createData = await createResponse.json();
@@ -285,6 +285,7 @@ const Home: React.FC = () => {
       setResult(`Chatbot created successfully!\nYour API Endpoint: ${apiEndpoint}\nResponse: ${response}`);
       setMessage('');
       setFiles(null);
+      setMode(''); // Reset mode after submission
       fetchConversations();
       fetchAllConversations();
     } catch (err) {
@@ -447,6 +448,18 @@ const Home: React.FC = () => {
                 className="w-full px-4 py-2 bg-gray-800 border-2 border-blue-500/50 rounded-md font-mono text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder-gray-500 disabled:bg-gray-900/50 animate-pulse-border"
                 disabled={isLoading}
               />
+            </div>
+            <div className="w-[90px]">
+              <select
+                value={mode}
+                onChange={(e) => setMode(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-800 border-2 border-blue-500/50 rounded-md font-mono text-gray-100 focus:outline-none placeholder-gray-500 disabled:bg-gray-900/50 animate-pulse-border"
+                disabled={isLoading}
+              >
+                <option value="">Default</option>
+                <option value="precision">Precision</option>
+                <option value="exploration">Exploration</option>
+              </select>
             </div>
             <div className="relative">
               <label htmlFor="file" className="block">

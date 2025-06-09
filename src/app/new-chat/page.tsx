@@ -21,6 +21,7 @@ interface Conversation {
 const NewChat: React.FC = () => {
   const [message, setMessage] = useState<string>("")
   const [files, setFiles] = useState<File[] | null>(null)
+  const [mode, setMode] = useState<string>("") // Added state to track mode
   const [result, setResult] = useState<string>("")
   const [error, setError] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -106,6 +107,7 @@ const NewChat: React.FC = () => {
     setConversations([])
     setMessage("")
     setFiles(null)
+    setMode("") // Reset mode when starting new chat
     setResult("")
     setError("")
     router.push("/new-chat")
@@ -160,16 +162,15 @@ const NewChat: React.FC = () => {
       const botName = `Chatbot-${Date.now()}`
       const prompt = `User: ${message || "File upload"}\n${files ? `Files: ${JSON.stringify(files.map((f) => f.name))}\n` : ""}`
 
+      const createBody = { name: botName, prompt }
+      if (mode) createBody['mode'] = mode // Include mode if selected
       const createResponse = await fetch(`${backendUrl}/chatbots`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${renderToken}`,
         },
-        body: JSON.stringify({
-          name: botName,
-          prompt,
-        }),
+        body: JSON.stringify(createBody),
       })
       const createData = await createResponse.json()
       if (createData.status !== "success") {
@@ -213,6 +214,7 @@ const NewChat: React.FC = () => {
       setResult(`Chatbot created successfully!\nYour API Endpoint: ${apiEndpoint}\nResponse: ${response}`)
       setMessage("")
       setFiles(null)
+      setMode("") // Reset mode after submission
     } catch (err) {
       console.error("Error:", err)
       setError("Failed to create chatbot. Please try again.")
@@ -288,6 +290,18 @@ const NewChat: React.FC = () => {
               className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-500"
               disabled={isLoading}
             />
+          </div>
+          <div className="w-[90px]">
+            <select
+              value={mode}
+              onChange={(e) => setMode(e.target.value)}
+              className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-500"
+              disabled={isLoading}
+            >
+              <option value="">Default</option>
+              <option value="precision">Precision</option>
+              <option value="exploration">Exploration</option>
+            </select>
           </div>
           <div className="relative">
             <label htmlFor="file" className="block">

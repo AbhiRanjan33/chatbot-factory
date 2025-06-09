@@ -14,6 +14,7 @@ const ChatWithBot: React.FC = () => {
       'https://my-chatbot-factory.onrender.com/api/v1/chatbots/chat/chbt_ce8e8905d3da437983b02a9ceb51327d'
   );
   const [message, setMessage] = useState<string>('');
+  const [mode, setMode] = useState<string>(''); // Added state for mode
   const [output, setOutput] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [chatHistory, setChatHistory] = useState<{ role: 'user' | 'bot'; content: string }[]>([]);
@@ -78,13 +79,16 @@ const ChatWithBot: React.FC = () => {
     setOutput('Sending...');
     setIsLoading(true);
     setMessage('');
+    setMode(''); // Reset mode after submission
 
     try {
       // Send message to chatbot API
+      const body = { message: userMessage };
+      if (mode) body.mode = mode; // Include mode if selected
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify(body),
       });
       const data = await response.json();
       if (data.status !== 'success') {
@@ -183,6 +187,25 @@ const ChatWithBot: React.FC = () => {
             />
           </div>
 
+          <div className="mb-4 bg-gray-900/80 p-4 rounded-xl border-2 border-blue-500/50 shadow-[0_0_10px_rgba(96,165,250,0.3)]">
+            <label htmlFor="mode" className="block mb-1 text-blue-400 font-medium font-['Orbitron']">
+              Response Mode:
+            </label>
+            <div className="w-32">
+              <select
+                id="mode"
+                value={mode}
+                onChange={(e) => setMode(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-800 border-2 border-blue-500/50 rounded-md font-mono text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder-gray-500 disabled:bg-gray-900/50 animate-pulse-border"
+                disabled={isLoading}
+              >
+                <option value="">Default</option>
+                <option value="precision">Precision</option>
+                <option value="exploration">Exploration</option>
+              </select>
+            </div>
+          </div>
+
           <div className="flex-1 bg-gray-900/80 rounded-xl shadow-[0_0_20px_rgba(96,165,250,0.3)] border-2 border-blue-500/50 p-6 overflow-y-auto relative holographic-overlay break-words">
             <div className="absolute top-2 left-2 w-2 h-2 bg-blue-400 animate-blink"></div>
             <div className="absolute top-2 right-2 w-2 h-2 bg-blue-400 animate-blink delay-200"></div>
@@ -212,16 +235,18 @@ const ChatWithBot: React.FC = () => {
               )}
             </div>
 
-            <div className="p-3 border-t border-gray-800 flex items-center gap-3">
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && !isLoading && message.trim() && handleSendMessage()}
-                placeholder="Type your message..."
-                className="w-full px-4 py-2 bg-gray-800 border-2 border-blue-500/50 rounded-md font-mono text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder-gray-500 disabled:bg-gray-900/50 animate-pulse-border"
-                disabled={isLoading}
-              />
+            <div className="p-3 border-t border-gray-800 flex flex-col sm:flex-row items-center gap-3">
+              <div className="flex-1 w-full">
+                <input
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && !isLoading && message.trim() && handleSendMessage()}
+                  placeholder="Type your message..."
+                  className="w-full px-4 py-2 bg-gray-800 border-2 border-blue-500/50 rounded-md font-mono text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-400 placeholder-gray-500 disabled:bg-gray-900/50 animate-pulse-border"
+                  disabled={isLoading}
+                />
+              </div>
               <button
                 onClick={handleSendMessage}
                 disabled={isLoading || !message.trim()}
