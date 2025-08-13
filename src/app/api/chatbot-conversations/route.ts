@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { connectToDatabase } from '../../lib/mongodb';
 
-export async function POST(request) {
+export async function POST(request: NextRequest) {
   try {
     const authData = auth();
     console.log('Auth Data:', authData);
@@ -31,7 +31,7 @@ export async function POST(request) {
   }
 }
 
-export async function GET(request) {
+export async function GET(request: NextRequest) {
   try {
     const authData = auth();
     console.log('Auth Data (GET):', authData);
@@ -55,17 +55,20 @@ export async function GET(request) {
       .toArray();
 
     return NextResponse.json(
-      conversations.map((conv) => ({
-        role: 'user',
-        content: conv.prompt,
-        createdAt: conv.createdAt,
-      })).concat(
-        conversations.map((conv) => ({
-          role: 'bot',
-          content: conv.response,
+      conversations
+        .map((conv) => ({
+          role: 'user',
+          content: conv.prompt,
           createdAt: conv.createdAt,
         }))
-      ).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+        .concat(
+          conversations.map((conv) => ({
+            role: 'bot',
+            content: conv.response,
+            createdAt: conv.createdAt,
+          }))
+        )
+        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
     );
   } catch (error) {
     console.error('GET Error:', error);
