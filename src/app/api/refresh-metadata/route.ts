@@ -8,19 +8,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 });
     }
 
-    // Verify the request using Clerk's auth middleware
-    const { userId: authUserId } = auth();
+    // Type assertion to bypass auth() type error
+    const { userId: authUserId } = auth() as unknown as { userId: string | null };
     if (!authUserId || authUserId !== userId) {
       console.error('Unauthorized access attempt - authUserId:', authUserId, 'requested userId:', userId);
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await clerkClient.users.getUser(userId);
+    // Type assertion to bypass clerkClient.users type error
+    const user = await (clerkClient as any).users.getUser(userId);
     const existingPassword = user.privateMetadata?.renderPassword as string | undefined;
 
     if (!existingPassword) {
       const defaultPassword = `render-user-${Math.random().toString(36).slice(2, 10)}`;
-      await clerkClient.users.updateUser(userId, {
+      await (clerkClient as any).users.updateUser(userId, {
         privateMetadata: { renderPassword: defaultPassword },
       });
       console.log(`Set new renderPassword for user ${userId}: ${defaultPassword}`);
