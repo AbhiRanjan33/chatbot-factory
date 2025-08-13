@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, type FormEvent } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { useRouter, useSearchParams } from "next/navigation"
 import { v4 as uuidv4 } from "uuid"
@@ -21,7 +21,7 @@ interface Conversation {
 const NewChat: React.FC = () => {
   const [message, setMessage] = useState<string>("")
   const [files, setFiles] = useState<File[] | null>(null)
-  const [mode, setMode] = useState<string>("") // Added state to track mode
+  const [mode, setMode] = useState<string>("")
   const [result, setResult] = useState<string>("")
   const [error, setError] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -32,6 +32,28 @@ const NewChat: React.FC = () => {
   const { getToken, isSignedIn } = useAuth()
   const backendUrl = "https://my-chatbot-factory.onrender.com/api/v1"
   const apiUrl = "/api/conversations"
+
+  const fetchSessionConversations = useCallback(async (sessionId: string) => {
+    try {
+      const token = await getToken()
+      const response = await fetch(`${apiUrl}?sessionId=${encodeURIComponent(sessionId)}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      const data = await response.json()
+      if (response.ok) {
+        setConversations(data)
+        localStorage.setItem(`conversations_${sessionId}`, JSON.stringify(data))
+      } else {
+        setError("Failed to load session history.")
+      }
+    } catch (error) {
+      setError("Error loading session history.")
+    }
+  }, [getToken]);
 
   useEffect(() => {
     // Initialize or resume session
@@ -50,32 +72,9 @@ const NewChat: React.FC = () => {
     if (savedConversations) {
       setConversations(JSON.parse(savedConversations))
     } else if (resumeSessionId) {
-      // Fetch session conversations from backend if resuming
       fetchSessionConversations(resumeSessionId)
     }
-  }, [searchParams])
-
-  const fetchSessionConversations = async (sessionId: string) => {
-    try {
-      const token = await getToken()
-      const response = await fetch(`${apiUrl}?sessionId=${encodeURIComponent(sessionId)}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      const data = await response.json()
-      if (response.ok) {
-        setConversations(data)
-        localStorage.setItem(`conversations_${sessionId}`, JSON.stringify(data))
-      } else {
-        setError("Failed to load session history.")
-      }
-    } catch (err) {
-      setError("Error loading session history.")
-    }
-  }
+  }, [searchParams, fetchSessionConversations])
 
   const handleNewChat = async () => {
     if (conversations.length > 0) {
@@ -94,8 +93,8 @@ const NewChat: React.FC = () => {
             }),
           ),
         )
-      } catch (err) {
-        console.error("Failed to save session:", err)
+      } catch (error) {
+        console.error("Failed to save session:", error)
       }
     }
     // Clear current session
@@ -107,7 +106,7 @@ const NewChat: React.FC = () => {
     setConversations([])
     setMessage("")
     setFiles(null)
-    setMode("") // Reset mode when starting new chat
+    setMode("")
     setResult("")
     setError("")
     router.push("/new-chat")
@@ -144,7 +143,7 @@ const NewChat: React.FC = () => {
     setIsLoading(true)
 
     try {
-      const clerkToken = await getToken()
+      const token = await getToken()
       const loginResponse = await fetch(`${backendUrl}/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -162,8 +161,8 @@ const NewChat: React.FC = () => {
       const botName = `Chatbot-${Date.now()}`
       const prompt = `User: ${message || "File upload"}\n${files ? `Files: ${JSON.stringify(files.map((f) => f.name))}\n` : ""}`
 
-      const createBody = { name: botName, prompt }
-      if (mode) createBody['mode'] = mode // Include mode if selected
+      const createBody: { name: string; prompt: string; mode?: string } = { name: botName, prompt }
+      if (mode) createBody.mode = mode
       const createResponse = await fetch(`${backendUrl}/chatbots`, {
         method: "POST",
         headers: {
@@ -214,9 +213,9 @@ const NewChat: React.FC = () => {
       setResult(`Chatbot created successfully!\nYour API Endpoint: ${apiEndpoint}\nResponse: ${response}`)
       setMessage("")
       setFiles(null)
-      setMode("") // Reset mode after submission
-    } catch (err) {
-      console.error("Error:", err)
+      setMode("")
+    } catch (error) {
+      console.error("Error:", error)
       setError("Failed to create chatbot. Please try again.")
     } finally {
       setIsLoading(false)
@@ -276,6 +275,16 @@ const NewChat: React.FC = () => {
           ) : (
             <div className="text-gray-500 italic flex items-center justify-center h-full">
               Start a new conversation...
+            </div>
+          )}
+          {result && (
+            <div className="mt-4 p-3 bg-gray-800 rounded-md text-green-400">
+              {result}
+            </div>
+          )}
+          {error && (
+            <div className="mt-4 p-3 bg-red-900/30 rounded-md text-red-400">
+              {error}
             </div>
           )}
         </div>

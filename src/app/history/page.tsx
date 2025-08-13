@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import Navbar from "../components/Navbar"
@@ -26,13 +26,7 @@ const History: React.FC = () => {
   const { getToken, isSignedIn } = useAuth()
   const apiUrl = "/api/conversations"
 
-  useEffect(() => {
-    if (isSignedIn) {
-      fetchConversations()
-    }
-  }, [isSignedIn])
-
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     try {
       setIsLoading(true)
       const token = await getToken()
@@ -50,12 +44,18 @@ const History: React.FC = () => {
       } else {
         setError("Failed to load chat history.")
       }
-    } catch (err) {
+    } catch (error) {
       setError("Error loading chat history.")
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [getToken]);
+
+  useEffect(() => {
+    if (isSignedIn) {
+      fetchConversations()
+    }
+  }, [isSignedIn, fetchConversations])
 
   const toggleSession = (sessionId: string) => {
     setExpandedSessions((prev) => {

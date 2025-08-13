@@ -7,6 +7,7 @@ const WelcomePage: React.FC = () => {
   const sectionsRef = useRef<(HTMLDivElement | null)[]>([])
 
   useEffect(() => {
+    const sections = sectionsRef.current; // Copy ref value
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -19,12 +20,12 @@ const WelcomePage: React.FC = () => {
       { threshold: 0.2 }
     )
 
-    sectionsRef.current.forEach((section) => {
+    sections.forEach((section) => {
       if (section) observer.observe(section)
     })
 
     return () => {
-      sectionsRef.current.forEach((section) => {
+      sections.forEach((section) => {
         if (section) observer.unobserve(section)
       })
     }

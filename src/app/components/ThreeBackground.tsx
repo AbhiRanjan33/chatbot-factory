@@ -5,15 +5,16 @@ const ThreeBackground: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!mountRef.current) return;
+    const mount = mountRef.current;
+    if (!mount) return;
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#0A0E2A'); // Deep indigo for futuristic vibe
+    scene.background = new THREE.Color('#0A0E2A');
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    mountRef.current.appendChild(renderer.domElement);
+    mount.appendChild(renderer.domElement);
 
     // Particles
     const particles = new THREE.BufferGeometry();
@@ -25,7 +26,7 @@ const ThreeBackground: React.FC = () => {
     particles.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
 
     const material = new THREE.PointsMaterial({
-      color: 0x00f7ff, // Neon cyan to match theme
+      color: 0x00f7ff,
       size: 0.2,
       transparent: true,
       opacity: 0.8,
@@ -39,7 +40,6 @@ const ThreeBackground: React.FC = () => {
     let mouseX = 0;
     let mouseY = 0;
     const onMouseMove = (e: MouseEvent) => {
-      // Normalize coordinates to [-1, 1]
       mouseX = (e.clientX / window.innerWidth) * 2 - 1;
       mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
     };
@@ -48,10 +48,8 @@ const ThreeBackground: React.FC = () => {
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
-      // Gentle auto-rotation for baseline 3D effect
       particleSystem.rotation.y += 0.002;
-      // Apply mouse-driven rotation for interactivity
-      particleSystem.rotation.x = mouseY * 1.0; // Increased sensitivity
+      particleSystem.rotation.x = mouseY * 1.0;
       particleSystem.rotation.y = mouseX * 1.0;
       renderer.render(scene, camera);
     };
@@ -59,7 +57,6 @@ const ThreeBackground: React.FC = () => {
 
     // Resize handler
     const handleResize = () => {
-      if (!mountRef.current) return;
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -69,8 +66,8 @@ const ThreeBackground: React.FC = () => {
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', onMouseMove);
-      if (mountRef.current && renderer.domElement) {
-        mountRef.current.removeChild(renderer.domElement);
+      if (mount && renderer.domElement) {
+        mount.removeChild(renderer.domElement);
       }
     };
   }, []);

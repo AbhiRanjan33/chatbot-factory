@@ -5,15 +5,16 @@ const ThreeWelcomeBackground: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!mountRef.current) return;
+    const mount = mountRef.current;
+    if (!mount) return;
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#0A0E2A'); // Deep indigo to match WelcomePage
+    scene.background = new THREE.Color('#0A0E2A');
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    mountRef.current.appendChild(renderer.domElement);
+    mount.appendChild(renderer.domElement);
 
     // Starfield particles
     const particleCount = 1500;
@@ -21,11 +22,9 @@ const ThreeWelcomeBackground: React.FC = () => {
     const posArray = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
-      // Position
-      posArray[i * 3] = (Math.random() - 0.5) * 200; // Wider spread
+      posArray[i * 3] = (Math.random() - 0.5) * 200;
       posArray[i * 3 + 1] = (Math.random() - 0.5) * 200;
       posArray[i * 3 + 2] = (Math.random() - 0.5) * 200;
-      // Color (mix of neon blue and purple)
       const color = Math.random() < 0.7 ? new THREE.Color('#00f7ff') : new THREE.Color('#ff00ff');
       colors[i * 3] = color.r;
       colors[i * 3 + 1] = color.g;
@@ -57,10 +56,8 @@ const ThreeWelcomeBackground: React.FC = () => {
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
-      // Gentle auto-movement for starfield effect
       particleSystem.rotation.y += 0.0005;
       particleSystem.rotation.x += 0.0003;
-      // Mouse-driven parallax
       particleSystem.rotation.x = mouseY * 0.6;
       particleSystem.rotation.y = mouseX * 0.6;
       renderer.render(scene, camera);
@@ -78,8 +75,8 @@ const ThreeWelcomeBackground: React.FC = () => {
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', onMouseMove);
-      if (mountRef.current && renderer.domElement) {
-        mountRef.current.removeChild(renderer.domElement);
+      if (mount && renderer.domElement) {
+        mount.removeChild(renderer.domElement);
       }
     };
   }, []);

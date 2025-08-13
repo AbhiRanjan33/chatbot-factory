@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios'; // Import AxiosError
 
 const ChatInterface = () => {
   const [name, setName] = useState('');
@@ -19,7 +19,7 @@ const ChatInterface = () => {
       console.log('Chatbot created:', response.data);
       setMessage('Chatbot created successfully!');
       setError(null);
-    } catch (err: any) {
+    } catch (err: AxiosError) { // Specify AxiosError
       console.error('Error creating chatbot:', err);
       console.log('Response status:', err.response?.status);
       console.log('Response data:', err.response?.data);
@@ -30,7 +30,7 @@ const ChatInterface = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const clerkToken = 'eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18ydlpnWU41ZENIY1B2cURYRkJzN2ZyNmlXOVMiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAiLCJleHAiOjE3NDQzODUxMzYsImZ2YSI6WzQyNywtMV0sImlhdCI6MTc0NDM4NTA3NiwiaXNzIjoiaHR0cHM6Ly9mcmFuay1idWxsLTQ4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc0NDM4NTA2Niwic2lkIjoic2Vzc18ydlpqTWRQcDJDQmZWNFVhQllvMjhzM2VOTFQiLCJzdWIiOiJ1c2VyXzJ2WmpNako3OU1KTTE2WmdjOHdTcGUwdUU4ZyJ9.KWsfQP0p1f6Yuw12IoiZMeYme58kRz6h-TjTnEorG9CIqox8hIJLh6IzxErg-Vz9HtFJd7NLlUkZWvDIfgQKK__xVbvCELIL1jm8s1gHtLzLfomjRT1POR0oi1k5Qs5IEDQw74aGYWCFg8z2i4g0ueTUSF2VvqQ6i_pWh_PZh3UFDy5dsQOsL5eVqgwLEsdwYB73VkXdW6DjnNJrzjlqknIVw6B6gNFgu8bIdR6npjgM8iag_O5Xdx0jtfLqCXpyR2SSp9kch-Sp75gmTsAHIU1x6a0ogZXVOzRIDMNKOAOxg6k63Oql2P1DFUgD68kRICs4SslKaJ0h1YgWnUH4Xw'; // Replace with dynamic token if needed
+    const clerkToken = 'eyJhbGciOiJSUzI1NiIsImNhdCI6ImNsX0I3ZDRQRDExMUFBQSIsImtpZCI6Imluc18ydlpnWU41ZENIY1B2cURYRkJzN2ZyNmlXOVMiLCJ0eXAiOiJKV1QifQ.eyJhenAiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAiLCJleHAiOjE3NDQzODUxMzYsImZ2YSI6WzQyNywtMV0sImlhdCI6MTc0NDM4NTA3NiwiaXNzIjoiaHR0cHM6Ly9mcmFuay1idWxsLTQ4LmNsZXJrLmFjY291bnRzLmRldiIsIm5iZiI6MTc0NDM4NTA2Niwic2lkIjoic2Vzc18ydlpqTWRQcDJDQmZWNFVhQllvMjhzM2VOTFQiLCJzdWIiOiJ1c2VyXzJ2WmpNako3OU1KTTE2WmdjOHdTcGUwdUU4ZyJ9.KWsfQP0p1f6Yuw12IoiZMeYme58kRz6h-TjTnEorG9CIqox8hIJLh6IzxErg-Vz9HtFJd7NLlUkZWvDIfgQKK__xVbvCELIL1jm8s1gHtLzLfomjRT1POR0oi1k5Qs5IEDQw74aGYWCFg8z2i4g0ueTUSF2VvqQ6i_pWh_PZh3UFDy5dsQOsL5eVqgwLEsdwYB73VkXdW6DjnNJrzjlqknIVw6B6gNFgu8bIdR6npjgM8iag_O5Xdx0jtfLqCXpyR2SSp9kch-Sp75gmTsAHIU1x6a0ogZXVOzRIDMNKOAOxg6k63Oql2P1DFUgD68kRICs4SslKaJ0h1YgWnUH4Xw';
     await createChatbot(clerkToken);
   };
 
