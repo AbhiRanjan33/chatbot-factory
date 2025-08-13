@@ -7,17 +7,22 @@ import { useRouter } from "next/navigation"
 import { v4 as uuidv4 } from "uuid"
 
 interface NavbarProps {
-  onOpenHistory: () => void;
+  onOpenHistory?: () => void;
+  onNewChat?: () => Promise<void> | void; // Added optional onNewChat prop
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onOpenHistory }) => {
+const Navbar: React.FC<NavbarProps> = ({ onOpenHistory, onNewChat }) => {
   const { isSignedIn, user } = useUser()
   const { signOut } = useClerk()
   const router = useRouter()
 
-  const handleNewChat = () => {
-    const newSessionId = uuidv4()
-    router.push(`/?sessionId=${newSessionId}`)
+  const handleNewChat = async () => {
+    if (onNewChat) {
+      await onNewChat(); // Call the passed onNewChat if provided
+    } else {
+      const newSessionId = uuidv4()
+      router.push(`/?sessionId=${newSessionId}`)
+    }
   }
 
   return (
@@ -52,26 +57,28 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenHistory }) => {
                   />
                 </svg>
               </button>
-              <button
-                onClick={onOpenHistory}
-                className="text-blue-400 hover:text-cyan-400 p-2 rounded-md hover:bg-blue-900/30 transition-all animate-pulse-border"
-                title="View History"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-6 h-6"
+              {onOpenHistory && (
+                <button
+                  onClick={onOpenHistory}
+                  className="text-blue-400 hover:text-cyan-400 p-2 rounded-md hover:bg-blue-900/30 transition-all animate-pulse-border"
+                  title="View History"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-6 h-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </button>
+              )}
             </>
           )}
           {isSignedIn ? (

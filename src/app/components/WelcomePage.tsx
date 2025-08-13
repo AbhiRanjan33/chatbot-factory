@@ -4,10 +4,9 @@ import React, { useEffect, useRef } from "react"
 import Link from "next/link"
 
 const WelcomePage: React.FC = () => {
-  const sectionsRef = useRef<(HTMLDivElement | null)[]>([])
+  const sectionsRef = useRef<HTMLDivElement[]>([])
 
   useEffect(() => {
-    const sections = sectionsRef.current; // Copy ref value
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -20,12 +19,12 @@ const WelcomePage: React.FC = () => {
       { threshold: 0.2 }
     )
 
-    sections.forEach((section) => {
+    sectionsRef.current.forEach((section) => {
       if (section) observer.observe(section)
     })
 
     return () => {
-      sections.forEach((section) => {
+      sectionsRef.current.forEach((section) => {
         if (section) observer.unobserve(section)
       })
     }
@@ -65,7 +64,9 @@ const WelcomePage: React.FC = () => {
       {/* Features Section */}
       <section className="py-16 px-4 sm:px-8">
         <div
-          ref={(el) => (sectionsRef.current[0] = el)}
+          ref={(el) => {
+            if (el && !sectionsRef.current.includes(el)) sectionsRef.current.push(el)
+          }}
           className="max-w-5xl mx-auto opacity-0 transition-all duration-700"
         >
           <h2 className="font-['Orbitron'] text-4xl font-bold text-blue-400 text-center mb-12 animate-fade-in">

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import ThreeWelcomeBackground from '../components/ThreeWelcomeBackground'
 
 const WelcomePage: React.FC = () => {
-  const sectionsRef = useRef<(HTMLDivElement | null)[]>([])
+  const sectionRef = useRef<HTMLDivElement | null>(null) // Use a single RefObject for one element
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -20,14 +20,14 @@ const WelcomePage: React.FC = () => {
       { threshold: 0.2 }
     )
 
-    sectionsRef.current.forEach((section) => {
-      if (section) observer.observe(section)
-    })
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
+    }
 
     return () => {
-      sectionsRef.current.forEach((section) => {
-        if (section) observer.unobserve(section)
-      })
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current)
+      }
     }
   }, [])
 
@@ -64,7 +64,7 @@ const WelcomePage: React.FC = () => {
       {/* Features Section */}
       <section className="py-16 px-4 md:px-8">
         <div
-          ref={(el) => (sectionsRef.current[0] = el)}
+          ref={sectionRef} // Use single RefObject
           className="max-w-5xl mx-auto opacity-0 transition-all duration-700"
         >
           <h2 className="text-4xl font-semibold text-blue-400 text-center mb-12">

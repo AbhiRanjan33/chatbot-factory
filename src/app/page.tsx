@@ -24,7 +24,7 @@ interface Conversation {
 const Home: React.FC = () => {
   const [message, setMessage] = useState<string>('');
   const [files, setFiles] = useState<File[] | null>(null);
-  const [mode, setMode] = useState<string>(''); // Added state to track mode
+  const [mode, setMode] = useState<string>('');
   const [result, setResult] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -84,9 +84,10 @@ const Home: React.FC = () => {
         console.error('Failed to fetch conversations:', data.error);
         setError('Failed to load chat history');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error fetching conversations:', err);
-      setError('Error loading chat history');
+      const errorMessage = err instanceof Error ? err.message : 'Error loading chat history';
+      setError(errorMessage);
     }
   };
 
@@ -117,9 +118,10 @@ const Home: React.FC = () => {
         console.error('Failed to fetch all conversations:', data.error);
         setError('Failed to load conversation history');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error fetching all conversations:', err);
-      setError('Error loading conversation history');
+      const errorMessage = err instanceof Error ? err.message : 'Error loading conversation history';
+      setError(errorMessage);
     }
   };
 
@@ -205,8 +207,8 @@ const Home: React.FC = () => {
       prompt += `--- Current Message ---\nUser: ${message || 'File upload'}\n${files ? `Files: ${JSON.stringify(files.map((f) => f.name))}\n` : ''}`;
 
       console.log('Creating chatbot:', { name: botName, prompt, mode });
-      const createBody = { name: botName, prompt };
-      if (mode) createBody['mode'] = mode; // Include mode if selected
+      const createBody: { name: string; prompt: string; mode?: string } = { name: botName, prompt };
+      if (mode) createBody.mode = mode;
       const createResponse = await fetch(`${backendUrl}/chatbots`, {
         method: 'POST',
         headers: {
@@ -285,12 +287,13 @@ const Home: React.FC = () => {
       setResult(`Chatbot created successfully!\nYour API Endpoint: ${apiEndpoint}\nResponse: ${response}`);
       setMessage('');
       setFiles(null);
-      setMode(''); // Reset mode after submission
+      setMode('');
       fetchConversations();
       fetchAllConversations();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error:', err);
-      setError(err.message || 'Failed to create chatbot. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create chatbot. Please try again.';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -689,4 +692,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home;
+export default Home

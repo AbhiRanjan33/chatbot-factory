@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
-import Image from 'next/image'; // Import Image component
+import Image from 'next/image';
 import Navbar from '../components/Navbar';
 import Loading from '../components/Loading';
 import ThreeBackground from '../components/ThreeBackground';
@@ -15,7 +15,7 @@ const ChatWithBot: React.FC = () => {
       'https://my-chatbot-factory.onrender.com/api/v1/chatbots/chat/chbt_ce8e8905d3da437983b02a9ceb51327d'
   );
   const [message, setMessage] = useState<string>('');
-  const [mode, setMode] = useState<string>(''); // Added state for mode
+  const [mode, setMode] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [chatHistory, setChatHistory] = useState<{ role: 'user' | 'bot'; content: string }[]>([]);
   const { isSignedIn, getToken } = useAuth();
@@ -27,7 +27,6 @@ const ChatWithBot: React.FC = () => {
     }
   }, [searchParams]);
 
-  // Memoize fetchConversations to prevent recreation
   const fetchConversations = React.useCallback(async () => {
     try {
       const token = await getToken();
@@ -75,17 +74,15 @@ const ChatWithBot: React.FC = () => {
       return;
     }
 
-    // Add user message to chat history
     const userMessage = message;
     setChatHistory((prev) => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
     setMessage('');
-    setMode(''); // Reset mode after submission
+    setMode('');
 
     try {
-      // Send message to chatbot API
       const body: { message: string; mode?: string } = { message: userMessage };
-      if (mode) body.mode = mode; // Include mode if selected
+      if (mode) body.mode = mode;
       const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -99,7 +96,6 @@ const ChatWithBot: React.FC = () => {
       const botResponse = data.data.response;
       setChatHistory((prev) => [...prev, { role: 'bot', content: botResponse }]);
 
-      // Save conversation
       const clerkToken = await getToken();
       const conversation = {
         prompt: userMessage,
@@ -120,11 +116,10 @@ const ChatWithBot: React.FC = () => {
       } else {
         console.log('Conversation saved:', saveData);
       }
-    } catch (error: Error) {
-      const errorMessage = `Error: ${error.message}`;
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? `Error: ${error.message}` : 'Error: Unknown error occurred';
       setChatHistory((prev) => [...prev, { role: 'bot', content: errorMessage }]);
 
-      // Save error conversation
       const clerkToken = await getToken();
       const conversation = {
         prompt: userMessage,
@@ -301,7 +296,6 @@ const ChatWithBot: React.FC = () => {
         <div className="absolute w-4 h-4 border-2 border-cyan-400/30 rounded-full top-1/4 left-1/5 animate-orbit" style={{ animationDuration: '20s' }}></div>
         <div className="absolute w-4 h-4 border-2 border-cyan-400/30 rounded-full bottom-1/3 right-1/4 animate-orbit" style={{ animationDuration: '18s', animationDirection: 'reverse' }}></div>
       </div>
-      {/* ... rest of the style JSX remains unchanged ... */}
     </div>
   );
 };

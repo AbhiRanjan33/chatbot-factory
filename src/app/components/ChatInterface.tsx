@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 const ChatInterface = () => {
   const [name, setName] = useState('');
@@ -12,7 +12,8 @@ const ChatInterface = () => {
   const createChatbot = async (apiKey: string) => {
     try {
       console.log('Creating chatbot with apiKey:', apiKey);
-      const response = await axios.post('https://my-chatbot-factory.onrender.com/api/v1/chatbots/', 
+      const response = await axios.post(
+        'https://my-chatbot-factory.onrender.com/api/v1/chatbots/',
         { name, prompt },
         { headers: { Authorization: `Bearer ${apiKey}` } }
       );
@@ -22,13 +23,13 @@ const ChatInterface = () => {
     } catch (err: unknown) {
       console.error('Error creating chatbot:', err);
       // Safely handle the error as an Axios error
-      const errorMessage = err instanceof Error && 'response' in err && err.response?.data?.message 
-        ? err.response.data.message 
-        : err instanceof Error 
-          ? err.message 
+      const errorMessage = err instanceof AxiosError && err.response?.data?.message
+        ? err.response.data.message
+        : err instanceof Error
+          ? err.message
           : 'Unknown error';
-      console.log('Response status:', err instanceof Error && 'response' in err ? err.response?.status : 'N/A');
-      console.log('Response data:', err instanceof Error && 'response' in err ? err.response?.data : 'N/A');
+      console.log('Response status:', err instanceof AxiosError ? err.response?.status : 'N/A');
+      console.log('Response data:', err instanceof AxiosError ? err.response?.data : 'N/A');
       setError(`Chatbot creation failed: ${errorMessage}`);
       setMessage(null);
     }
