@@ -44,7 +44,7 @@ const History: React.FC = () => {
       } else {
         setError("Failed to load chat history.")
       }
-    } catch (error) {
+    } catch {
       setError("Error loading chat history.")
     } finally {
       setIsLoading(false)

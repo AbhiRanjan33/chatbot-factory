@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import axios, { AxiosError } from 'axios'; // Import AxiosError
+import axios from 'axios';
 
 const ChatInterface = () => {
   const [name, setName] = useState('');
@@ -19,11 +19,17 @@ const ChatInterface = () => {
       console.log('Chatbot created:', response.data);
       setMessage('Chatbot created successfully!');
       setError(null);
-    } catch (err: AxiosError) { // Specify AxiosError
+    } catch (err: unknown) {
       console.error('Error creating chatbot:', err);
-      console.log('Response status:', err.response?.status);
-      console.log('Response data:', err.response?.data);
-      setError(`Chatbot creation failed: ${err.response?.data?.message || err.message}`);
+      // Safely handle the error as an Axios error
+      const errorMessage = err instanceof Error && 'response' in err && err.response?.data?.message 
+        ? err.response.data.message 
+        : err instanceof Error 
+          ? err.message 
+          : 'Unknown error';
+      console.log('Response status:', err instanceof Error && 'response' in err ? err.response?.status : 'N/A');
+      console.log('Response data:', err instanceof Error && 'response' in err ? err.response?.data : 'N/A');
+      setError(`Chatbot creation failed: ${errorMessage}`);
       setMessage(null);
     }
   };

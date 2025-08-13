@@ -36,6 +36,10 @@ const NewChat: React.FC = () => {
   const fetchSessionConversations = useCallback(async (sessionId: string) => {
     try {
       const token = await getToken()
+      if (!token) {
+        setError("Authentication token not available.")
+        return
+      }
       const response = await fetch(`${apiUrl}?sessionId=${encodeURIComponent(sessionId)}`, {
         method: "GET",
         headers: {
@@ -50,7 +54,7 @@ const NewChat: React.FC = () => {
       } else {
         setError("Failed to load session history.")
       }
-    } catch (error) {
+    } catch {
       setError("Error loading session history.")
     }
   }, [getToken]);
@@ -81,6 +85,10 @@ const NewChat: React.FC = () => {
       // Save current session to backend
       try {
         const token = await getToken()
+        if (!token) {
+          setError("Authentication token not available.")
+          return
+        }
         await Promise.all(
           conversations.map((conv) =>
             fetch(apiUrl, {
@@ -93,8 +101,8 @@ const NewChat: React.FC = () => {
             }),
           ),
         )
-      } catch (error) {
-        console.error("Failed to save session:", error)
+      } catch {
+        setError("Failed to save session.")
       }
     }
     // Clear current session
@@ -128,7 +136,7 @@ const NewChat: React.FC = () => {
     }
   }
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isSignedIn) {
       setError("Please sign in to create a chatbot")
