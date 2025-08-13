@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { connectToDatabase } from '../../lib/mongodb';
 
+// Define the Conversation interface to type the MongoDB documents
+interface Conversation {
+  _id?: string;
+  userId: string;
+  apiEndpoint: string;
+  prompt: string;
+  response: string;
+  createdAt: Date;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const authData = auth();
@@ -15,7 +25,7 @@ export async function POST(request: NextRequest) {
     const { prompt, response, apiEndpoint } = await request.json();
     const { db } = await connectToDatabase();
 
-    const conversation = {
+    const conversation: Conversation = {
       userId: user.id,
       apiEndpoint,
       prompt,
@@ -25,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     await db.collection('chatbot_conversations').insertOne(conversation);
     return NextResponse.json({ message: 'Conversation saved', conversation });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('POST Error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
@@ -48,7 +58,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { db } = await connectToDatabase();
-    const conversations = await db
+    const conversations: Conversation[] = await db
       .collection('chatbot_conversations')
       .find({ userId: user.id, apiEndpoint })
       .sort({ createdAt: 1 }) // Oldest first for chat order
@@ -56,13 +66,13 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       conversations
-        .map((conv) => ({
+        .map((conv: Conversation) => ({
           role: 'user',
           content: conv.prompt,
           createdAt: conv.createdAt,
         }))
         .concat(
-          conversations.map((conv) => ({
+          conversations.map((conv: Conversation) => ({
             role: 'bot',
             content: conv.response,
             createdAt: conv.createdAt,
@@ -70,7 +80,7 @@ export async function GET(request: NextRequest) {
         )
         .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('GET Error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }

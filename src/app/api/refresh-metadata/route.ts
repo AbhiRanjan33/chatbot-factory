@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth, clerkClient } from '@clerk/nextjs/server';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const { userId } = await request.json();
+    const { userId }: { userId: string } = await request.json();
     if (!userId) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 });
     }
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
     console.log(`Existing renderPassword for user ${userId}: ${existingPassword}`);
     return NextResponse.json({ renderPassword: existingPassword });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error refreshing metadata:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
