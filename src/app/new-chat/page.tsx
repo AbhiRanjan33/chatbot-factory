@@ -152,6 +152,9 @@ const NewChat: React.FC = () => {
 
     try {
       const token = await getToken()
+      if (!token) {
+        throw new Error("Authentication token not available.")
+      }
       const loginResponse = await fetch(`${backendUrl}/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -212,6 +215,16 @@ const NewChat: React.FC = () => {
         createdAt: new Date().toISOString(),
         sessionId,
       }
+
+      // Save conversation to backend
+      await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(conversation),
+      })
 
       // Update local conversations
       const updatedConversations = [...conversations, conversation]
